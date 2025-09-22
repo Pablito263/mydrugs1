@@ -39,7 +39,7 @@ interface Order {
   paymentMethod: string
 }
 
-// Produtos de cannabis medicinal - CATÁLOGO MELHORADO COM IMAGENS REAIS
+// Produtos de cannabis medicinal - CATÁLOGO MELHORADO
 const cannabisProducts: Product[] = [
   {
     id: 1,
@@ -49,7 +49,7 @@ const cannabisProducts: Product[] = [
     description: "Óleo de CBD de alta pureza extraído de plantas orgânicas. Ideal para ansiedade, dor crônica e insônia. Sem THC, 100% legal e seguro. Testado em laboratório para garantir qualidade farmacêutica.",
     rating: 4.9,
     inStock: true,
-    image: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/7b473c57-246d-412b-8100-421e810bb296.png",
+    image: "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=300&fit=crop",
     thc: "0%",
     cbd: "1000mg",
     effects: ["Relaxamento", "Alívio da dor", "Redução da ansiedade"],
@@ -63,7 +63,7 @@ const cannabisProducts: Product[] = [
     description: "Tintura balanceada 1:1 THC:CBD para máximo efeito terapêutico. Ideal para dores severas, espasmos musculares e condições neurológicas. Dosagem precisa com conta-gotas incluído.",
     rating: 4.8,
     inStock: true,
-    image: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/e55d5bb9-c767-415a-bb04-b689518837c5.webp",
+    image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400&h=300&fit=crop",
     thc: "500mg",
     cbd: "500mg",
     effects: ["Alívio da dor", "Relaxamento muscular", "Euforia controlada"],
@@ -77,7 +77,7 @@ const cannabisProducts: Product[] = [
     description: "Flor premium de Cannabis Indica com alto teor de CBD. Efeito relaxante profundo, ideal para uso noturno. Cultivada organicamente sem pesticidas. Rica em terpenos naturais.",
     rating: 4.7,
     inStock: true,
-    image: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/38783135-6b8c-4153-8855-b5db05e48ae7.jpg",
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
     thc: "18%",
     cbd: "2%",
     effects: ["Sedação", "Relaxamento profundo", "Alívio da dor"],
@@ -697,7 +697,7 @@ export default function MyDrugs() {
           </div>
         </div>
 
-        {/* Grid de Produtos - CATÁLOGO MELHORADO COM IMAGENS REAIS */}
+        {/* Grid de Produtos - CATÁLOGO MELHORADO */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => (
             <div
