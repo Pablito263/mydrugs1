@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, ShoppingCart, User, Package, Wallet, Star, Filter, Eye, Plus, Minus, CreditCard, Bitcoin, Truck, Clock, CheckCircle } from 'lucide-react'
+import { Search, ShoppingCart, User, Package, Wallet, Star, Filter, Eye, Plus, Minus, CreditCard, Bitcoin, Truck, Clock, CheckCircle, Leaf, Shield, Award, Heart, Zap, Users } from 'lucide-react'
 
 // Tipos de dados
 interface Product {
@@ -13,6 +13,10 @@ interface Product {
   rating: number
   inStock: boolean
   image: string
+  thc?: string
+  cbd?: string
+  effects?: string[]
+  medicalUse?: string
 }
 
 interface CartItem extends Product {
@@ -35,78 +39,130 @@ interface Order {
   paymentMethod: string
 }
 
-// Dados mock dos produtos farmacêuticos - DESCRIÇÕES MELHORADAS
-const mockProducts: Product[] = [
+// Produtos de cannabis medicinal - CATÁLOGO MELHORADO
+const cannabisProducts: Product[] = [
   {
     id: 1,
-    name: "Paracetamol 500mg",
-    price: 12.99,
-    category: "Analgésicos",
-    description: "Analgésico e antitérmico eficaz para alívio rápido de dores de cabeça, dores musculares, dores nas costas e redução da febre. Fórmula de ação rápida com efeito prolongado por até 6 horas.",
-    rating: 4.8,
+    name: "CBD Oil Premium 1000mg",
+    price: 299.99,
+    category: "Óleos CBD",
+    description: "Óleo de CBD de alta pureza extraído de plantas orgânicas. Ideal para ansiedade, dor crônica e insônia. Sem THC, 100% legal e seguro. Testado em laboratório para garantir qualidade farmacêutica.",
+    rating: 4.9,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop"
+    image: "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=300&fit=crop",
+    thc: "0%",
+    cbd: "1000mg",
+    effects: ["Relaxamento", "Alívio da dor", "Redução da ansiedade"],
+    medicalUse: "Ansiedade, dor crônica, epilepsia, insônia"
   },
   {
     id: 2,
-    name: "Vitamina D3 2000UI",
-    price: 29.99,
-    category: "Vitaminas",
-    description: "Suplemento essencial para fortalecimento dos ossos, dentes e sistema imunológico. Auxilia na absorção de cálcio e fósforo, prevenindo osteoporose e melhorando a saúde cardiovascular. Ideal para quem tem pouca exposição solar.",
-    rating: 4.9,
+    name: "THC:CBD Balanced Tincture",
+    price: 449.99,
+    category: "Tinturas",
+    description: "Tintura balanceada 1:1 THC:CBD para máximo efeito terapêutico. Ideal para dores severas, espasmos musculares e condições neurológicas. Dosagem precisa com conta-gotas incluído.",
+    rating: 4.8,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?w=400&h=300&fit=crop"
+    image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400&h=300&fit=crop",
+    thc: "500mg",
+    cbd: "500mg",
+    effects: ["Alívio da dor", "Relaxamento muscular", "Euforia controlada"],
+    medicalUse: "Dor severa, espasmos, esclerose múltipla"
   },
   {
     id: 3,
-    name: "Omeprazol 20mg",
-    price: 18.50,
-    category: "Digestivos",
-    description: "Protetor gástrico de última geração que reduz a produção de ácido no estômago. Indicado para tratamento de úlceras, gastrite, refluxo gastroesofágico e síndrome de Zollinger-Ellison. Alívio duradouro por 24 horas.",
+    name: "Cannabis Indica Flower - Purple Kush",
+    price: 89.99,
+    category: "Flores",
+    description: "Flor premium de Cannabis Indica com alto teor de CBD. Efeito relaxante profundo, ideal para uso noturno. Cultivada organicamente sem pesticidas. Rica em terpenos naturais.",
     rating: 4.7,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=300&fit=crop"
+    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    thc: "18%",
+    cbd: "2%",
+    effects: ["Sedação", "Relaxamento profundo", "Alívio da dor"],
+    medicalUse: "Insônia, dor crônica, estresse pós-traumático"
   },
   {
     id: 4,
-    name: "Dipirona 500mg",
-    price: 8.99,
-    category: "Analgésicos",
-    description: "Analgésico e antitérmico de ação rápida e potente para dores intensas e febre alta. Eficaz contra dores de cabeça, enxaqueca, cólicas, dores pós-operatórias e estados febris. Início de ação em 15-30 minutos.",
+    name: "CBD Capsules 25mg - 60 unidades",
+    price: 199.99,
+    category: "Cápsulas",
+    description: "Cápsulas de CBD de liberação controlada. Dosagem precisa e conveniente para uso diário. Ideal para quem busca os benefícios do CBD sem o sabor do óleo. Absorção otimizada.",
     rating: 4.6,
-    inStock: false,
-    image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=400&h=300&fit=crop"
+    inStock: true,
+    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&h=300&fit=crop",
+    thc: "0%",
+    cbd: "25mg por cápsula",
+    effects: ["Bem-estar geral", "Redução da inflamação", "Equilíbrio"],
+    medicalUse: "Inflamação, ansiedade leve, manutenção da saúde"
   },
   {
     id: 5,
-    name: "Complexo B",
-    price: 24.99,
-    category: "Vitaminas",
-    description: "Fórmula completa com todas as 8 vitaminas do complexo B (B1, B2, B3, B5, B6, B7, B9, B12). Essencial para energia celular, metabolismo, sistema nervoso saudável, formação de glóbulos vermelhos e manutenção da pele, cabelos e unhas. Combate o cansaço e melhora o humor.",
+    name: "Cannabis Topical Cream - Alívio da Dor",
+    price: 129.99,
+    category: "Tópicos",
+    description: "Creme tópico com CBD e THC para aplicação local. Alívio rápido de dores musculares e articulares. Não causa efeitos psicoativos. Fórmula com mentol e arnica para potencializar o efeito.",
     rating: 4.8,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&h=300&fit=crop"
+    image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&h=300&fit=crop",
+    thc: "100mg",
+    cbd: "200mg",
+    effects: ["Alívio local da dor", "Redução da inflamação", "Relaxamento muscular"],
+    medicalUse: "Artrite, dores musculares, lesões esportivas"
   },
   {
     id: 6,
-    name: "Probióticos Premium",
-    price: 45.99,
-    category: "Suplementos",
-    description: "Blend avançado com 10 bilhões de UFC de probióticos vivos incluindo Lactobacillus e Bifidobacterium. Restaura e mantém a flora intestinal saudável, fortalece o sistema imunológico, melhora a digestão e absorção de nutrientes. Com prebióticos para potencializar os efeitos.",
+    name: "Full Spectrum CBD Oil 2000mg",
+    price: 499.99,
+    category: "Óleos CBD",
+    description: "Óleo de CBD de espectro completo com todos os canabinoides naturais. Efeito entourage para máxima eficácia terapêutica. Extração CO2 supercrítica preserva todos os compostos benéficos.",
     rating: 4.9,
+    inStock: false,
+    image: "https://images.unsplash.com/photo-1607619056574-7b8d3ee536b2?w=400&h=300&fit=crop",
+    thc: "<0.3%",
+    cbd: "2000mg",
+    effects: ["Efeito entourage", "Alívio completo", "Bem-estar holístico"],
+    medicalUse: "Condições complexas, dor severa, epilepsia refratária"
+  },
+  {
+    id: 7,
+    name: "Cannabis Sativa - Green Crack",
+    price: 94.99,
+    category: "Flores",
+    description: "Flor Sativa energizante para uso diurno. Aumenta foco e criatividade. Ideal para depressão e fadiga. Perfil terpênico cítrico e energético. Cultivada com técnicas sustentáveis.",
+    rating: 4.7,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400&h=300&fit=crop"
+    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&h=300&fit=crop",
+    thc: "22%",
+    cbd: "1%",
+    effects: ["Energia", "Foco", "Criatividade", "Euforia"],
+    medicalUse: "Depressão, fadiga, TDAH, perda de apetite"
+  },
+  {
+    id: 8,
+    name: "CBG Oil - The Mother Cannabinoid",
+    price: 349.99,
+    category: "Óleos Especiais",
+    description: "Óleo de CBG (Canabigerol), conhecido como 'mãe dos canabinoides'. Propriedades antibacterianas e neuroprotetoras únicas. Ideal para condições inflamatórias e neurodegenerativas.",
+    rating: 4.8,
+    inStock: true,
+    image: "https://images.unsplash.com/photo-1576671081837-49000212a370?w=400&h=300&fit=crop",
+    thc: "0%",
+    cbd: "100mg",
+    effects: ["Neuroproteção", "Antibacteriano", "Anti-inflamatório"],
+    medicalUse: "Glaucoma, doenças inflamatórias intestinais, Huntington"
   }
 ]
 
-const categories = ["Todos", "Analgésicos", "Vitaminas", "Digestivos", "Suplementos"]
+const categories = ["Todos", "Óleos CBD", "Tinturas", "Flores", "Cápsulas", "Tópicos", "Óleos Especiais"]
 
 export default function MyDrugs() {
   // Estados principais
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'cart' | 'orders' | 'product'>('home')
   const [user, setUser] = useState<User | null>(null)
-  const [products, setProducts] = useState<Product[]>(mockProducts)
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts)
+  const [products, setProducts] = useState<Product[]>(cannabisProducts)
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(cannabisProducts)
   const [cart, setCart] = useState<CartItem[]>([])
   const [orders, setOrders] = useState<Order[]>([])
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -114,7 +170,7 @@ export default function MyDrugs() {
   const [selectedCategory, setSelectedCategory] = useState('Todos')
   const [showPayment, setShowPayment] = useState(false)
 
-  // Estados do formulário - OTIMIZADOS para evitar re-renders desnecessários
+  // Estados do formulário
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [registerForm, setRegisterForm] = useState({ email: '', password: '' })
 
@@ -149,7 +205,8 @@ export default function MyDrugs() {
     if (searchTerm) {
       filtered = filtered.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase())
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.medicalUse?.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
 
@@ -160,7 +217,7 @@ export default function MyDrugs() {
     setFilteredProducts(filtered)
   }, [searchTerm, selectedCategory, products])
 
-  // Handlers otimizados com useCallback para evitar re-renders
+  // Handlers otimizados
   const handleLoginEmailChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setLoginForm(prev => ({ ...prev, email: e.target.value }))
   }, [])
@@ -177,7 +234,7 @@ export default function MyDrugs() {
     setRegisterForm(prev => ({ ...prev, password: e.target.value }))
   }, [])
 
-  // Funções de autenticação - OTIMIZADAS
+  // Funções de autenticação
   const handleLogin = useCallback((e: React.FormEvent) => {
     e.preventDefault()
     if (loginForm.email && loginForm.password) {
@@ -242,7 +299,7 @@ export default function MyDrugs() {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0)
   }
 
-  // Função de checkout - SIMPLIFICADA
+  // Função de checkout
   const handleCheckout = (paymentMethod: string) => {
     if (cart.length === 0 || !user) return
 
@@ -261,9 +318,9 @@ export default function MyDrugs() {
     setCurrentView('orders')
   }
 
-  // Componente Header com nova logo
+  // Componente Header com logos atualizadas
   const Header = () => (
-    <header className="bg-black text-white shadow-2xl border-b border-purple-500/30">
+    <header className="bg-black text-white shadow-2xl border-b border-green-500/30">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div 
@@ -271,7 +328,7 @@ export default function MyDrugs() {
             onClick={() => setCurrentView('home')}
           >
             <img 
-              src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/cd3a4572-9892-4d76-bb2b-cb7c5a3706ab.png" 
+              src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/0cf524dd-ac6f-4dd8-9d7c-d765a7e1ef93.png" 
               alt="MyDrugs Logo" 
               className="h-12 w-auto"
             />
@@ -279,7 +336,7 @@ export default function MyDrugs() {
               <h1 className="text-2xl font-bold text-white">
                 MYDRUGS
               </h1>
-              <p className="text-xs text-purple-400 font-light">
+              <p className="text-xs text-green-400 font-light">
                 Innovation | Health | Future
               </p>
             </div>
@@ -289,7 +346,7 @@ export default function MyDrugs() {
             <div className="relative">
               <button
                 onClick={() => setCurrentView('cart')}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 p-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 p-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
               >
                 <ShoppingCart className="h-5 w-5" />
                 {cart.length > 0 && (
@@ -304,12 +361,12 @@ export default function MyDrugs() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setCurrentView('orders')}
-                  className="bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 p-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+                  className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 p-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
                 >
                   <Truck className="h-5 w-5" />
                 </button>
                 <div className="flex items-center space-x-2">
-                  <div className="bg-gradient-to-r from-blue-500 to-purple-500 p-2 rounded-full">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 p-2 rounded-full">
                     <User className="h-4 w-4" />
                   </div>
                   <span className="text-sm font-medium">{user.name}</span>
@@ -343,29 +400,29 @@ export default function MyDrugs() {
     </header>
   )
 
-  // Componente de Login - OTIMIZADO
+  // Componente de Login
   const LoginView = () => (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black via-green-900/20 to-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Efeito de partículas de fundo */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-32 w-3 h-3 bg-purple-500 rounded-full animate-bounce"></div>
-        <div className="absolute bottom-32 left-40 w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-        <div className="absolute bottom-20 right-20 w-4 h-4 bg-pink-500 rounded-full animate-pulse"></div>
+        <div className="absolute top-20 left-20 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-32 left-40 w-2 h-2 bg-lime-500 rounded-full animate-ping"></div>
+        <div className="absolute bottom-20 right-20 w-4 h-4 bg-teal-500 rounded-full animate-pulse"></div>
         <div className="absolute top-60 left-1/2 w-2 h-2 bg-cyan-500 rounded-full animate-bounce"></div>
       </div>
 
-      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md shadow-2xl border border-white/20 relative z-10">
+      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md shadow-2xl border border-green-500/30 relative z-10">
         <div className="text-center mb-8">
           <img 
-            src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/cd3a4572-9892-4d76-bb2b-cb7c5a3706ab.png" 
+            src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/0bbb00f1-0ab9-4cb1-99e5-d8e899d6204b.png" 
             alt="MyDrugs Logo" 
             className="h-16 w-auto mx-auto mb-4"
           />
           <h2 className="text-3xl font-bold text-white">
             MYDRUGS
           </h2>
-          <p className="text-purple-400 text-sm font-light">
+          <p className="text-green-400 text-sm font-light">
             Innovation | Health | Future
           </p>
         </div>
@@ -376,7 +433,7 @@ export default function MyDrugs() {
               type="email"
               value={loginForm.email}
               onChange={handleLoginEmailChange}
-              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-green-500/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300"
               placeholder="Email"
               required
               autoComplete="email"
@@ -387,7 +444,7 @@ export default function MyDrugs() {
               type="password"
               value={loginForm.password}
               onChange={handleLoginPasswordChange}
-              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-green-500/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300"
               placeholder="Senha"
               required
               autoComplete="current-password"
@@ -395,7 +452,7 @@ export default function MyDrugs() {
           </div>
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+            className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-4 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
           >
             Entrar Agora
           </button>
@@ -404,7 +461,7 @@ export default function MyDrugs() {
           Não tem conta?{' '}
           <button
             onClick={() => setCurrentView('register')}
-            className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-300"
+            className="text-green-400 hover:text-green-300 font-medium transition-colors duration-300"
           >
             Cadastre-se
           </button>
@@ -413,29 +470,29 @@ export default function MyDrugs() {
     </div>
   )
 
-  // Componente de Registro - ULTRA OTIMIZADO
+  // Componente de Registro
   const RegisterView = () => (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-black via-green-900/20 to-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Efeito de partículas de fundo */}
       <div className="absolute inset-0">
-        <div className="absolute top-20 left-20 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-        <div className="absolute top-40 right-32 w-3 h-3 bg-purple-500 rounded-full animate-bounce"></div>
-        <div className="absolute bottom-32 left-40 w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-        <div className="absolute bottom-20 right-20 w-4 h-4 bg-pink-500 rounded-full animate-pulse"></div>
+        <div className="absolute top-20 left-20 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+        <div className="absolute top-40 right-32 w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
+        <div className="absolute bottom-32 left-40 w-2 h-2 bg-lime-500 rounded-full animate-ping"></div>
+        <div className="absolute bottom-20 right-20 w-4 h-4 bg-teal-500 rounded-full animate-pulse"></div>
         <div className="absolute top-60 left-1/2 w-2 h-2 bg-cyan-500 rounded-full animate-bounce"></div>
       </div>
 
-      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md shadow-2xl border border-white/20 relative z-10">
+      <div className="bg-white/10 backdrop-blur-lg rounded-3xl p-8 w-full max-w-md shadow-2xl border border-green-500/30 relative z-10">
         <div className="text-center mb-8">
           <img 
-            src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/cd3a4572-9892-4d76-bb2b-cb7c5a3706ab.png" 
+            src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/0bbb00f1-0ab9-4cb1-99e5-d8e899d6204b.png" 
             alt="MyDrugs Logo" 
             className="h-16 w-auto mx-auto mb-4"
           />
           <h2 className="text-3xl font-bold text-white">
             MYDRUGS
           </h2>
-          <p className="text-purple-400 text-sm font-light">
+          <p className="text-green-400 text-sm font-light">
             Innovation | Health | Future
           </p>
         </div>
@@ -446,7 +503,7 @@ export default function MyDrugs() {
               type="email"
               value={registerForm.email}
               onChange={handleRegisterEmailChange}
-              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-green-500/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300"
               placeholder="Email"
               required
               autoComplete="email"
@@ -457,7 +514,7 @@ export default function MyDrugs() {
               type="password"
               value={registerForm.password}
               onChange={handleRegisterPasswordChange}
-              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+              className="w-full px-4 py-4 rounded-xl bg-white/20 border border-green-500/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300"
               placeholder="Senha"
               required
               autoComplete="new-password"
@@ -474,7 +531,7 @@ export default function MyDrugs() {
           Já tem conta?{' '}
           <button
             onClick={() => setCurrentView('login')}
-            className="text-purple-400 hover:text-purple-300 font-medium transition-colors duration-300"
+            className="text-green-400 hover:text-green-300 font-medium transition-colors duration-300"
           >
             Entre aqui
           </button>
@@ -483,43 +540,97 @@ export default function MyDrugs() {
     </div>
   )
 
-  // Componente Home
+  // Componente Home - PÁGINA DE VENDAS COMPLETA
   const HomeView = () => (
     <div className="min-h-screen bg-black">
       <Header />
       
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-900 via-black to-blue-900 py-16 relative overflow-hidden">
+      {/* Hero Section com GIF animado */}
+      <div className="bg-gradient-to-r from-green-900 via-black to-emerald-900 py-20 relative overflow-hidden">
         {/* Efeito de partículas */}
         <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <div className="absolute top-20 right-20 w-3 h-3 bg-purple-500 rounded-full animate-bounce"></div>
-          <div className="absolute bottom-20 left-32 w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-          <div className="absolute bottom-10 right-10 w-4 h-4 bg-pink-500 rounded-full animate-pulse"></div>
+          <div className="absolute top-10 left-10 w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+          <div className="absolute top-20 right-20 w-3 h-3 bg-emerald-500 rounded-full animate-bounce"></div>
+          <div className="absolute bottom-20 left-32 w-2 h-2 bg-lime-500 rounded-full animate-ping"></div>
+          <div className="absolute bottom-10 right-10 w-4 h-4 bg-teal-500 rounded-full animate-pulse"></div>
         </div>
         
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
-            Farmácia do <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">Futuro</span>
-          </h1>
-          <p className="text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-            Produtos farmacêuticos de qualidade com pagamentos em criptomoedas. Seguro, rápido e inovador.
-          </p>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div className="text-center lg:text-left">
+              <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+                Cannabis <span className="bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">Medicinal</span>
+              </h1>
+              <p className="text-xl text-white/80 mb-8 max-w-2xl">
+                Produtos de cannabis medicinal de alta qualidade para seu bem-estar. Tratamentos naturais, seguros e eficazes com entrega discreta.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <button 
+                  onClick={() => setCurrentView('register')}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+                >
+                  Começar Agora
+                </button>
+                <button className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-bold py-4 px-8 rounded-xl transition-all duration-300 hover:scale-105 border border-white/30">
+                  Ver Catálogo
+                </button>
+              </div>
+            </div>
+            <div className="flex justify-center">
+              <img 
+                src="https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/16ab436b-8619-49cf-a44a-f167f3213865.gif" 
+                alt="Cannabis Animation" 
+                className="max-w-full h-auto rounded-2xl shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Seção de Benefícios */}
+      <div className="py-16 bg-gradient-to-b from-black to-green-900/10">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
+            Por que escolher <span className="text-green-400">MyDrugs</span>?
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-green-500/30 hover:scale-105 transition-all duration-300">
+              <div className="bg-gradient-to-r from-green-500 to-emerald-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-4">100% Seguro</h3>
+              <p className="text-white/70">Produtos testados em laboratório com certificação de qualidade farmacêutica.</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-green-500/30 hover:scale-105 transition-all duration-300">
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Truck className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-4">Entrega Discreta</h3>
+              <p className="text-white/70">Embalagem neutra e entrega rápida em todo o Brasil com total privacidade.</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 text-center border border-green-500/30 hover:scale-105 transition-all duration-300">
+              <div className="bg-gradient-to-r from-purple-500 to-pink-500 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Heart className="h-8 w-8 text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-4">Suporte Médico</h3>
+              <p className="text-white/70">Orientação especializada para escolher o produto ideal para sua condição.</p>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Filtros e Busca */}
       <div className="container mx-auto px-4 py-8">
-        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-white/20">
+        <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 mb-8 border border-green-500/30">
           <div className="flex flex-col md:flex-row gap-4 items-center">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white/60 h-5 w-5" />
               <input
                 type="text"
-                placeholder="Buscar produtos..."
+                placeholder="Buscar produtos, condições médicas..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+                className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/20 border border-green-500/30 text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300"
               />
             </div>
             <div className="flex items-center space-x-2">
@@ -527,7 +638,7 @@ export default function MyDrugs() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="px-4 py-3 rounded-xl bg-white/20 border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-purple-400 transition-all duration-300"
+                className="px-4 py-3 rounded-xl bg-white/20 border border-green-500/30 text-white focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-300"
               >
                 {categories.map(category => (
                   <option key={category} value={category} className="bg-slate-800">
@@ -539,12 +650,12 @@ export default function MyDrugs() {
           </div>
         </div>
 
-        {/* Grid de Produtos */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Grid de Produtos - CATÁLOGO MELHORADO */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => (
             <div
               key={product.id}
-              className="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20 hover:scale-105 transition-all duration-300 group"
+              className="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl border border-green-500/30 hover:scale-105 transition-all duration-300 group"
             >
               <div className="relative">
                 <img
@@ -563,6 +674,12 @@ export default function MyDrugs() {
                     <Eye className="h-4 w-4 text-white" />
                   </button>
                 </div>
+                <div className="absolute top-4 left-4">
+                  <span className="bg-gradient-to-r from-green-500 to-emerald-500 text-white text-xs px-2 py-1 rounded-full">
+                    <Leaf className="h-3 w-3 inline mr-1" />
+                    Medicinal
+                  </span>
+                </div>
                 {!product.inStock && (
                   <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                     <span className="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">
@@ -574,7 +691,7 @@ export default function MyDrugs() {
               
               <div className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 text-white text-xs px-2 py-1 rounded-full">
+                  <span className="bg-gradient-to-r from-green-400 to-emerald-400 text-black text-xs px-2 py-1 rounded-full font-medium">
                     {product.category}
                   </span>
                   <div className="flex items-center space-x-1">
@@ -584,7 +701,30 @@ export default function MyDrugs() {
                 </div>
                 
                 <h3 className="text-white font-bold text-lg mb-2">{product.name}</h3>
+                
+                {/* Informações de THC/CBD */}
+                <div className="flex items-center space-x-4 mb-3">
+                  {product.thc && (
+                    <div className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">
+                      THC: {product.thc}
+                    </div>
+                  )}
+                  {product.cbd && (
+                    <div className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">
+                      CBD: {product.cbd}
+                    </div>
+                  )}
+                </div>
+                
                 <p className="text-white/70 text-sm mb-4 line-clamp-2">{product.description}</p>
+                
+                {/* Uso médico */}
+                {product.medicalUse && (
+                  <p className="text-green-400 text-xs mb-4 font-medium">
+                    <Heart className="h-3 w-3 inline mr-1" />
+                    {product.medicalUse}
+                  </p>
+                )}
                 
                 <div className="flex items-center justify-between">
                   <span className="text-2xl font-bold bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
@@ -593,7 +733,7 @@ export default function MyDrugs() {
                   <button
                     onClick={() => addToCart(product)}
                     disabled={!product.inStock}
-                    className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg disabled:cursor-not-allowed"
+                    className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-500 disabled:to-gray-600 text-white p-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg disabled:cursor-not-allowed"
                   >
                     <Plus className="h-5 w-5" />
                   </button>
@@ -603,10 +743,69 @@ export default function MyDrugs() {
           ))}
         </div>
       </div>
+
+      {/* Seção de Depoimentos */}
+      <div className="py-16 bg-gradient-to-b from-green-900/10 to-black">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-white mb-12">
+            O que nossos <span className="text-green-400">pacientes</span> dizem
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-green-500/30">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-green-500 to-emerald-500 w-12 h-12 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-white font-bold">Maria Silva</h4>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-white/80 italic">"O CBD Oil me ajudou muito com a ansiedade. Produto de qualidade e entrega super rápida!"</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-green-500/30">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-blue-500 to-cyan-500 w-12 h-12 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-white font-bold">João Santos</h4>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-white/80 italic">"Finalmente encontrei alívio para minha dor crônica. O atendimento é excelente!"</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 border border-green-500/30">
+              <div className="flex items-center mb-4">
+                <div className="bg-gradient-to-r from-purple-500 to-pink-500 w-12 h-12 rounded-full flex items-center justify-center">
+                  <Users className="h-6 w-6 text-white" />
+                </div>
+                <div className="ml-4">
+                  <h4 className="text-white font-bold">Ana Costa</h4>
+                  <div className="flex">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                </div>
+              </div>
+              <p className="text-white/80 italic">"Produtos seguros e eficazes. A diferença na minha qualidade de vida foi incrível!"</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   )
 
-  // Componente de Produto Individual
+  // Componente de Produto Individual - MELHORADO
   const ProductView = () => {
     if (!selectedProduct) return null
 
@@ -621,7 +820,7 @@ export default function MyDrugs() {
             ← Voltar
           </button>
           
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl border border-white/20">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl overflow-hidden shadow-2xl border border-green-500/30">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-8">
               <div>
                 <img
@@ -633,7 +832,7 @@ export default function MyDrugs() {
               
               <div className="space-y-6">
                 <div>
-                  <span className="bg-gradient-to-r from-purple-400 to-pink-400 text-white text-sm px-3 py-1 rounded-full">
+                  <span className="bg-gradient-to-r from-green-400 to-emerald-400 text-black text-sm px-3 py-1 rounded-full font-medium">
                     {selectedProduct.category}
                   </span>
                   <h1 className="text-3xl font-bold text-white mt-4">{selectedProduct.name}</h1>
@@ -653,6 +852,46 @@ export default function MyDrugs() {
                     <span className="text-white/80">({selectedProduct.rating})</span>
                   </div>
                 </div>
+
+                {/* Informações de THC/CBD */}
+                <div className="flex items-center space-x-4">
+                  {selectedProduct.thc && (
+                    <div className="bg-red-500/20 text-red-400 px-4 py-2 rounded-xl border border-red-500/30">
+                      <strong>THC:</strong> {selectedProduct.thc}
+                    </div>
+                  )}
+                  {selectedProduct.cbd && (
+                    <div className="bg-green-500/20 text-green-400 px-4 py-2 rounded-xl border border-green-500/30">
+                      <strong>CBD:</strong> {selectedProduct.cbd}
+                    </div>
+                  )}
+                </div>
+
+                {/* Efeitos */}
+                {selectedProduct.effects && (
+                  <div>
+                    <h3 className="text-white font-bold mb-2">Efeitos:</h3>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProduct.effects.map((effect, index) => (
+                        <span key={index} className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-sm border border-blue-500/30">
+                          <Zap className="h-3 w-3 inline mr-1" />
+                          {effect}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Uso médico */}
+                {selectedProduct.medicalUse && (
+                  <div>
+                    <h3 className="text-white font-bold mb-2">Indicações Médicas:</h3>
+                    <p className="text-green-400 bg-green-500/10 p-4 rounded-xl border border-green-500/30">
+                      <Heart className="h-4 w-4 inline mr-2" />
+                      {selectedProduct.medicalUse}
+                    </p>
+                  </div>
+                )}
                 
                 <p className="text-white/80 text-lg leading-relaxed">{selectedProduct.description}</p>
                 
@@ -677,7 +916,7 @@ export default function MyDrugs() {
                     setCurrentView('cart')
                   }}
                   disabled={!selectedProduct.inStock}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg disabled:cursor-not-allowed"
+                  className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 disabled:from-gray-500 disabled:to-gray-600 text-white font-bold py-4 px-6 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg disabled:cursor-not-allowed"
                 >
                   {selectedProduct.inStock ? 'Adicionar ao Carrinho' : 'Produto Indisponível'}
                 </button>
@@ -694,17 +933,17 @@ export default function MyDrugs() {
     <div className="min-h-screen bg-black">
       <Header />
       <div className="container mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold text-white mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold text-white mb-8 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
           Carrinho de Compras
         </h2>
         
         {cart.length === 0 ? (
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-green-500/30">
             <ShoppingCart className="h-16 w-16 text-white/50 mx-auto mb-4" />
             <p className="text-white/70 text-lg">Seu carrinho está vazio</p>
             <button
               onClick={() => setCurrentView('home')}
-              className="mt-4 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+              className="mt-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
             >
               Continuar Comprando
             </button>
@@ -713,7 +952,7 @@ export default function MyDrugs() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-4">
               {cart.map(item => (
-                <div key={item.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+                <div key={item.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-green-500/30">
                   <div className="flex items-center space-x-4">
                     <img
                       src={item.image}
@@ -723,6 +962,18 @@ export default function MyDrugs() {
                     <div className="flex-1">
                       <h3 className="text-white font-bold text-lg">{item.name}</h3>
                       <p className="text-white/70">{item.category}</p>
+                      <div className="flex items-center space-x-2 mt-1">
+                        {item.thc && (
+                          <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded text-xs">
+                            THC: {item.thc}
+                          </span>
+                        )}
+                        {item.cbd && (
+                          <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded text-xs">
+                            CBD: {item.cbd}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-green-400 font-bold">R$ {item.price.toFixed(2)}</p>
                     </div>
                     <div className="flex items-center space-x-3">
@@ -745,7 +996,7 @@ export default function MyDrugs() {
               ))}
             </div>
             
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 h-fit border border-white/20">
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 h-fit border border-green-500/30">
               <h3 className="text-white font-bold text-xl mb-4">Resumo do Pedido</h3>
               <div className="space-y-2 mb-6">
                 {cart.map(item => (
@@ -783,11 +1034,11 @@ export default function MyDrugs() {
           </div>
         )}
         
-        {/* Modal de Pagamento - SIMPLIFICADO */}
+        {/* Modal de Pagamento */}
         {showPayment && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md border border-white/20">
-              <h3 className="text-2xl font-bold text-white mb-6 text-center">Pagamento Rápido</h3>
+            <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 w-full max-w-md border border-green-500/30">
+              <h3 className="text-2xl font-bold text-white mb-6 text-center">Pagamento Seguro</h3>
               <div className="space-y-3">
                 <button
                   onClick={() => handleCheckout('Bitcoin')}
@@ -829,17 +1080,17 @@ export default function MyDrugs() {
     <div className="min-h-screen bg-black">
       <Header />
       <div className="container mx-auto px-4 py-8">
-        <h2 className="text-3xl font-bold text-white mb-8 bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold text-white mb-8 bg-gradient-to-r from-green-400 to-emerald-400 bg-clip-text text-transparent">
           Meus Pedidos
         </h2>
         
         {orders.length === 0 ? (
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-white/20">
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-12 text-center border border-green-500/30">
             <Package className="h-16 w-16 text-white/50 mx-auto mb-4" />
             <p className="text-white/70 text-lg">Você ainda não fez nenhum pedido</p>
             <button
               onClick={() => setCurrentView('home')}
-              className="mt-4 bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
+              className="mt-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg"
             >
               Começar a Comprar
             </button>
@@ -847,7 +1098,7 @@ export default function MyDrugs() {
         ) : (
           <div className="space-y-6">
             {orders.map(order => (
-              <div key={order.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+              <div key={order.id} className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-green-500/30">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <h3 className="text-white font-bold text-lg">Pedido #{order.id}</h3>
@@ -889,7 +1140,7 @@ export default function MyDrugs() {
                 
                 <div className="mt-4 pt-4 border-t border-white/20 flex justify-between items-center">
                   <span className="text-white/70">Pagamento: {order.paymentMethod}</span>
-                  <button className="bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg text-sm">
+                  <button className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl transition-all duration-300 hover:scale-105 shadow-lg text-sm">
                     Rastrear Pedido
                   </button>
                 </div>
