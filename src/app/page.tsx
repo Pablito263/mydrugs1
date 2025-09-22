@@ -39,7 +39,7 @@ interface Order {
   paymentMethod: string
 }
 
-// Produtos de cannabis medicinal - CATÁLOGO MELHORADO
+// Produtos de cannabis medicinal - CATÁLOGO MELHORADO COM IMAGENS REAIS
 const cannabisProducts: Product[] = [
   {
     id: 1,
@@ -49,7 +49,7 @@ const cannabisProducts: Product[] = [
     description: "Óleo de CBD de alta pureza extraído de plantas orgânicas. Ideal para ansiedade, dor crônica e insônia. Sem THC, 100% legal e seguro. Testado em laboratório para garantir qualidade farmacêutica.",
     rating: 4.9,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1612198188060-c7c2a3b66eae?w=400&h=300&fit=crop",
+    image: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/7b473c57-246d-412b-8100-421e810bb296.png",
     thc: "0%",
     cbd: "1000mg",
     effects: ["Relaxamento", "Alívio da dor", "Redução da ansiedade"],
@@ -63,7 +63,7 @@ const cannabisProducts: Product[] = [
     description: "Tintura balanceada 1:1 THC:CBD para máximo efeito terapêutico. Ideal para dores severas, espasmos musculares e condições neurológicas. Dosagem precisa com conta-gotas incluído.",
     rating: 4.8,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=400&h=300&fit=crop",
+    image: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/e55d5bb9-c767-415a-bb04-b689518837c5.webp",
     thc: "500mg",
     cbd: "500mg",
     effects: ["Alívio da dor", "Relaxamento muscular", "Euforia controlada"],
@@ -77,7 +77,7 @@ const cannabisProducts: Product[] = [
     description: "Flor premium de Cannabis Indica com alto teor de CBD. Efeito relaxante profundo, ideal para uso noturno. Cultivada organicamente sem pesticidas. Rica em terpenos naturais.",
     rating: 4.7,
     inStock: true,
-    image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop",
+    image: "https://k6hrqrxuu8obbfwn.public.blob.vercel-storage.com/temp/38783135-6b8c-4153-8855-b5db05e48ae7.jpg",
     thc: "18%",
     cbd: "2%",
     effects: ["Sedação", "Relaxamento profundo", "Alívio da dor"],
@@ -161,7 +161,7 @@ export default function MyDrugs() {
   // Estados principais
   const [currentView, setCurrentView] = useState<'home' | 'login' | 'register' | 'cart' | 'orders' | 'product'>('home')
   const [user, setUser] = useState<User | null>(null)
-  const [products, setProducts] = useState<Product[]>(cannabisProducts)
+  const [products] = useState<Product[]>(cannabisProducts)
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(cannabisProducts)
   const [cart, setCart] = useState<CartItem[]>([])
   const [orders, setOrders] = useState<Order[]>([])
@@ -174,28 +174,65 @@ export default function MyDrugs() {
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [registerForm, setRegisterForm] = useState({ email: '', password: '' })
 
-  // Carregar dados do localStorage
+  // Carregar dados do localStorage com verificação de ambiente
   useEffect(() => {
-    const savedUser = localStorage.getItem('mydrugs_user')
-    const savedCart = localStorage.getItem('mydrugs_cart')
-    const savedOrders = localStorage.getItem('mydrugs_orders')
+    if (typeof window === 'undefined') return
 
-    if (savedUser) setUser(JSON.parse(savedUser))
-    if (savedCart) setCart(JSON.parse(savedCart))
-    if (savedOrders) setOrders(JSON.parse(savedOrders))
+    try {
+      const savedUser = localStorage.getItem('mydrugs_user')
+      const savedCart = localStorage.getItem('mydrugs_cart')
+      const savedOrders = localStorage.getItem('mydrugs_orders')
+
+      if (savedUser) {
+        const parsedUser = JSON.parse(savedUser)
+        setUser(parsedUser)
+      }
+      if (savedCart) {
+        const parsedCart = JSON.parse(savedCart)
+        setCart(parsedCart)
+      }
+      if (savedOrders) {
+        const parsedOrders = JSON.parse(savedOrders)
+        setOrders(parsedOrders)
+      }
+    } catch (error) {
+      console.warn('Erro ao carregar dados do localStorage:', error)
+    }
   }, [])
 
-  // Salvar no localStorage
+  // Salvar no localStorage com verificação de ambiente
   useEffect(() => {
-    if (user) localStorage.setItem('mydrugs_user', JSON.stringify(user))
+    if (typeof window === 'undefined') return
+    
+    try {
+      if (user) {
+        localStorage.setItem('mydrugs_user', JSON.stringify(user))
+      } else {
+        localStorage.removeItem('mydrugs_user')
+      }
+    } catch (error) {
+      console.warn('Erro ao salvar usuário no localStorage:', error)
+    }
   }, [user])
 
   useEffect(() => {
-    localStorage.setItem('mydrugs_cart', JSON.stringify(cart))
+    if (typeof window === 'undefined') return
+    
+    try {
+      localStorage.setItem('mydrugs_cart', JSON.stringify(cart))
+    } catch (error) {
+      console.warn('Erro ao salvar carrinho no localStorage:', error)
+    }
   }, [cart])
 
   useEffect(() => {
-    localStorage.setItem('mydrugs_orders', JSON.stringify(orders))
+    if (typeof window === 'undefined') return
+    
+    try {
+      localStorage.setItem('mydrugs_orders', JSON.stringify(orders))
+    } catch (error) {
+      console.warn('Erro ao salvar pedidos no localStorage:', error)
+    }
   }, [orders])
 
   // Filtrar produtos
@@ -265,42 +302,52 @@ export default function MyDrugs() {
     }
   }, [registerForm])
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     setUser(null)
-    localStorage.removeItem('mydrugs_user')
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('mydrugs_user')
+      } catch (error) {
+        console.warn('Erro ao remover usuário do localStorage:', error)
+      }
+    }
     setCurrentView('home')
-  }
+  }, [])
 
   // Funções do carrinho
-  const addToCart = (product: Product) => {
-    const existingItem = cart.find(item => item.id === product.id)
-    if (existingItem) {
-      setCart(cart.map(item =>
-        item.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
-      ))
-    } else {
-      setCart([...cart, { ...product, quantity: 1 }])
-    }
-  }
+  const addToCart = useCallback((product: Product) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id)
+      if (existingItem) {
+        return prevCart.map(item =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      } else {
+        return [...prevCart, { ...product, quantity: 1 }]
+      }
+    })
+  }, [])
 
-  const updateQuantity = (id: number, quantity: number) => {
-    if (quantity === 0) {
-      setCart(cart.filter(item => item.id !== id))
-    } else {
-      setCart(cart.map(item =>
-        item.id === id ? { ...item, quantity } : item
-      ))
-    }
-  }
+  const updateQuantity = useCallback((id: number, quantity: number) => {
+    setCart(prevCart => {
+      if (quantity === 0) {
+        return prevCart.filter(item => item.id !== id)
+      } else {
+        return prevCart.map(item =>
+          item.id === id ? { ...item, quantity } : item
+        )
+      }
+    })
+  }, [])
 
-  const getTotalPrice = () => {
+  const getTotalPrice = useCallback(() => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0)
-  }
+  }, [cart])
 
   // Função de checkout
-  const handleCheckout = (paymentMethod: string) => {
+  const handleCheckout = useCallback((paymentMethod: string) => {
     if (cart.length === 0 || !user) return
 
     const newOrder: Order = {
@@ -312,11 +359,11 @@ export default function MyDrugs() {
       paymentMethod
     }
 
-    setOrders([newOrder, ...orders])
+    setOrders(prevOrders => [newOrder, ...prevOrders])
     setCart([])
     setShowPayment(false)
     setCurrentView('orders')
-  }
+  }, [cart, user, getTotalPrice])
 
   // Componente Header com logos atualizadas
   const Header = () => (
@@ -650,7 +697,7 @@ export default function MyDrugs() {
           </div>
         </div>
 
-        {/* Grid de Produtos - CATÁLOGO MELHORADO */}
+        {/* Grid de Produtos - CATÁLOGO MELHORADO COM IMAGENS REAIS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredProducts.map(product => (
             <div
